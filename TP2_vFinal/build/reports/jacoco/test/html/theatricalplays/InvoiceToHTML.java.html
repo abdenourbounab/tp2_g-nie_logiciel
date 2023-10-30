@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>InvoiceToHTML.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Theatrical-Players</a> &gt; <a href="index.source.html" class="el_package">theatricalplays</a> &gt; <span class="el_source">InvoiceToHTML.java</span></div><h1>InvoiceToHTML.java</h1><pre class="source lang-java linenums">package theatricalplays;
+
+import java.text.NumberFormat;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
+<span class="nc" id="L8">public class InvoiceToHTML {</span>
+
+    public static String generateHTMLInvoice(Customer customer, List&lt;Performance&gt; performances, Map&lt;String, Play&gt; plays) {
+        // Entête de la page HTML
+<span class="fc" id="L12">        StringBuilder html = new StringBuilder();</span>
+<span class="fc" id="L13">        html.append(&quot;&lt;html&gt; &lt;style&gt; table, th, td {border:1px solid black;} &lt;/style&gt; &lt;head&gt;&lt;title&gt;Facture&lt;/title&gt;&lt;/head&gt;&lt;body&gt;&quot;);</span>
+
+        // En-tête de la facture
+<span class="fc" id="L16">        html.append(&quot;&lt;h1&gt;Invoice&lt;/h1&gt;&quot;);</span>
+
+<span class="fc" id="L18">        html.append(&quot;&lt;ul&gt;&lt;li&gt;&lt;b&gt;Client : &lt;/b&gt;&quot;).append(customer.getName()).append(&quot;&lt;/li&gt;&lt;/ul&gt;&quot;);</span>
+
+<span class="fc" id="L20">        html.append(&quot;&lt;table&gt;&lt;tr&gt;&lt;th&gt;Piece&lt;/th&gt;&lt;th&gt;Seats sold&lt;/th&gt;&lt;th&gt;Price&lt;/th&gt;&lt;/tr&gt;&quot;);</span>
+
+        // Initialize volumeCredits to 0
+<span class="fc" id="L23">        int volumeCredits = 0;</span>
+
+        // Boucle sur les performances
+<span class="fc bfc" id="L26" title="All 2 branches covered.">        for (Performance perf : performances) {</span>
+<span class="fc" id="L27">            Play play = plays.get(perf.playID);</span>
+
+            // Calcul du montant et des crédits pour cette performance
+<span class="fc" id="L30">            double thisAmount = calculatePerformanceAmount(play, perf);</span>
+<span class="fc" id="L31">            int thisVolumeCredits = calculateVolumeCredits(play, perf);</span>
+
+            // Ajouter des crédits pour cette performance
+<span class="fc" id="L34">            volumeCredits += thisVolumeCredits;</span>
+
+            // Ajouter une ligne à la table HTML
+<span class="fc" id="L37">            html.append(&quot;&lt;tr&gt;&quot;)</span>
+<span class="fc" id="L38">                .append(&quot;&lt;td&gt;&quot;).append(play.name).append(&quot;&lt;/td&gt;&quot;)</span>
+<span class="fc" id="L39">                .append(&quot;&lt;td&gt;&quot;).append(perf.audience).append(&quot;&lt;/td&gt;&quot;)</span>
+<span class="fc" id="L40">                .append(&quot;&lt;td&gt;&quot;).append(NumberFormat.getCurrencyInstance(Locale.US).format(thisAmount)).append(&quot;&lt;/td&gt;&quot;)</span>
+<span class="fc" id="L41">                .append(&quot;&lt;/tr&gt;&quot;);</span>
+<span class="fc" id="L42">        }</span>
+
+        
+
+        // Calcul du montant total
+<span class="fc" id="L47">        double totalAmount = calculateTotalAmount(performances, plays);</span>
+
+<span class="fc" id="L49">        customer.setLoyaltyPoints(customer.getLoyaltyPoints() + volumeCredits);</span>
+
+        // Ajout du montant total
+<span class="fc" id="L52">        html.append(&quot;&lt;tr&gt;&lt;th colspan=\&quot;2\&quot;&gt;Total owed : &lt;/th&gt;&quot;).append(&quot;&lt;td&gt;&quot;).append(NumberFormat.getCurrencyInstance(Locale.US).format(totalAmount)).append(&quot;&lt;/td&gt;&lt;/tr&gt;&quot;);</span>
+
+        // Ajout des volumeCredits
+<span class="fc" id="L55">        html.append(&quot;&lt;tr&gt;&lt;th colspan=\&quot;2\&quot;&gt;Fidelity points earned : &lt;/th&gt;&quot;).append(&quot;&lt;td&gt;&quot;).append(volumeCredits).append(&quot;&lt;/td&gt;&lt;/tr&gt;&quot;);</span>
+
+<span class="fc" id="L57">        int customerLoyaltyPoints = customer.getLoyaltyPoints();</span>
+
+<span class="fc bfc" id="L59" title="All 2 branches covered.">        if (customerLoyaltyPoints &gt;= 150) {</span>
+            
+<span class="fc" id="L61">            double discountAmount = 15.0;</span>
+<span class="fc" id="L62">            double totalAmountReduced = totalAmount - discountAmount;</span>
+            // Ajout du message de réduction
+<span class="fc" id="L64">            html.append(&quot;&lt;tr&gt;&lt;th colspan=\&quot;3\&quot;&gt;You have &quot;).append(customerLoyaltyPoints)</span>
+<span class="fc" id="L65">                .append(&quot; Loyalty Points, you get a $15 reduction&lt;/th&gt;&lt;/tr&gt;&quot;);</span>
+
+<span class="fc" id="L67">            customerLoyaltyPoints -= 150;</span>
+<span class="fc" id="L68">            customer.setLoyaltyPoints(customerLoyaltyPoints);</span>
+
+            // Ajout du montant après réduction
+<span class="fc" id="L71">            html.append(&quot;&lt;tr&gt;&lt;th colspan=\&quot;2\&quot;&gt;Amount owed after reduction : &lt;/th&gt;&quot;)</span>
+<span class="fc" id="L72">                .append(&quot;&lt;td&gt;&quot;).append(NumberFormat.getCurrencyInstance(Locale.US).format(totalAmountReduced)).append(&quot;&lt;/td&gt;&lt;/tr&gt;&quot;);</span>
+
+            // Ajout des nouveaux points de fidélité
+<span class="fc" id="L75">            html.append(&quot;&lt;tr&gt;&lt;th colspan=\&quot;2\&quot;&gt;New Fidelity Points : &lt;/th&gt;&quot;)</span>
+<span class="fc" id="L76">                .append(&quot;&lt;td&gt;&quot;).append(customerLoyaltyPoints).append(&quot;&lt;/td&gt;&lt;/tr&gt;&quot;);</span>
+        }
+
+
+        
+<span class="fc" id="L81">        html.append(&quot;&lt;/table&gt;&quot;);</span>
+        // Fin de la page HTML
+<span class="fc" id="L83">        html.append(&quot;&lt;/body&gt;&lt;/html&gt;&quot;);</span>
+
+<span class="fc" id="L85">        return html.toString();</span>
+    }
+
+    private static double calculatePerformanceAmount(Play play, Performance perf) {
+<span class="fc" id="L89">        double thisAmount = 0.0;</span>
+<span class="fc bfc" id="L90" title="All 3 branches covered.">        switch (play.type) {</span>
+            case Play.PlayType.tragedy:
+<span class="fc" id="L92">                thisAmount = 400.0;</span>
+<span class="fc bfc" id="L93" title="All 2 branches covered.">                if (perf.audience &gt; 30) {</span>
+<span class="fc" id="L94">                    thisAmount += 10.0 * (perf.audience - 30);</span>
+                }
+                break;
+            case Play.PlayType.comedy:
+<span class="fc" id="L98">                thisAmount = 300.0;</span>
+<span class="fc bfc" id="L99" title="All 2 branches covered.">                if (perf.audience &gt; 20) {</span>
+<span class="fc" id="L100">                    thisAmount += 100.0 + 5.0 * (perf.audience - 20);</span>
+                }
+<span class="fc" id="L102">                thisAmount += 3.0 * perf.audience;</span>
+<span class="fc" id="L103">                break;</span>
+            default:
+<span class="fc" id="L105">                throw new Error(&quot;unknown type: &quot; + play.type);</span>
+        }
+<span class="fc" id="L107">        return thisAmount;</span>
+    }
+
+    private static int calculateVolumeCredits(Play play, Performance perf) {
+        // Ajouter des crédits de volume
+<span class="fc" id="L112">        int volumeCredits = Math.max(perf.audience - 30, 0);</span>
+
+        // Ajouter des crédits supplémentaires pour chaque groupe de 5 personnes pour les comédies
+<span class="fc bfc" id="L115" title="All 2 branches covered.">        if (play.type.equals(Play.PlayType.comedy)) {</span>
+<span class="fc" id="L116">            volumeCredits += perf.audience / 5;</span>
+        }
+<span class="fc" id="L118">        return volumeCredits;</span>
+    }
+
+    private static double calculateTotalAmount(List&lt;Performance&gt; performances, Map&lt;String, Play&gt; plays) {
+<span class="fc" id="L122">        double totalAmount = 0.0;</span>
+<span class="fc bfc" id="L123" title="All 2 branches covered.">        for (Performance perf : performances) {</span>
+<span class="fc" id="L124">            Play play = plays.get(perf.playID);</span>
+<span class="fc" id="L125">            totalAmount += calculatePerformanceAmount(play, perf);</span>
+<span class="fc" id="L126">        }</span>
+<span class="fc" id="L127">        return totalAmount;</span>
+    }
+
+    
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

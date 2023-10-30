@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StatementPrinter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Theatrical-Players</a> &gt; <a href="index.source.html" class="el_package">theatricalplays</a> &gt; <span class="el_source">StatementPrinter.java</span></div><h1>StatementPrinter.java</h1><pre class="source lang-java linenums">package theatricalplays;
+
+import java.text.NumberFormat;
+import java.util.Locale;
+import java.util.Map;
+
+
+<span class="fc" id="L8">public class StatementPrinter {</span>
+
+  public String print(Invoice invoice, Map&lt;String, Play&gt; plays) {
+    //int totalAmount = 0;
+<span class="fc" id="L12">    double totalAmount = 0.0;</span>
+<span class="fc" id="L13">    int volumeCredits = 0;</span>
+<span class="fc" id="L14">    StringBuilder result = new StringBuilder();</span>
+    
+    // En-tête de la déclaration
+<span class="fc" id="L17">    result.append(String.format(&quot;Statement for %s\n&quot;, invoice.getCustomer().getName()));</span>
+
+<span class="fc" id="L19">    NumberFormat frmt = NumberFormat.getCurrencyInstance(Locale.US);</span>
+
+<span class="fc bfc" id="L21" title="All 2 branches covered.">    for (Performance perf : invoice.performances) {</span>
+<span class="fc" id="L22">      Play play = plays.get(perf.playID);</span>
+      //int thisAmount = 0;
+<span class="fc" id="L24">      double thisAmount = 0.0;</span>
+
+      // Calcul du montant en fonction du type de pièce de théâtre
+<span class="fc bfc" id="L27" title="All 3 branches covered.">      switch (play.type) {</span>
+
+        case Play.PlayType.tragedy:
+<span class="fc" id="L30">          thisAmount = 400.0;</span>
+<span class="fc bfc" id="L31" title="All 2 branches covered.">          if (perf.audience &gt; 30) {</span>
+<span class="fc" id="L32">            thisAmount += 10.0 * (perf.audience - 30);</span>
+          }
+          break;
+
+        case Play.PlayType.comedy:
+<span class="fc" id="L37">          thisAmount = 300.0;</span>
+<span class="fc bfc" id="L38" title="All 2 branches covered.">          if (perf.audience &gt; 20) {</span>
+<span class="fc" id="L39">            thisAmount += 100.0 + 5.0 * (perf.audience - 20);</span>
+          }
+<span class="fc" id="L41">          thisAmount += 3.0 * perf.audience;</span>
+<span class="fc" id="L42">          break;</span>
+
+        default:
+<span class="fc" id="L45">          throw new Error(&quot;unknown type: ${play.type}&quot;);</span>
+      }
+
+      // Ajouter des crédits de volume
+<span class="fc" id="L49">      volumeCredits += Math.max(perf.audience - 30, 0);</span>
+
+      // Ajouter des crédits supplémentaires pour chaque groupe de 5 personnes pour les comédies
+<span class="fc bfc" id="L52" title="All 2 branches covered.">      if (Play.PlayType.comedy.equals(play.type)) volumeCredits += Math.floor(perf.audience / 5);</span>
+
+      // Ajouter une ligne pour cette représentation
+<span class="fc" id="L55">      result.append(String.format(&quot;  %s: %s (%s seats)\n&quot;, play.name, frmt.format(thisAmount), perf.audience));</span>
+<span class="fc" id="L56">      totalAmount += thisAmount;</span>
+<span class="fc" id="L57">    }</span>
+    
+<span class="fc" id="L59">    invoice.getCustomer().setLoyaltyPoints(invoice.getCustomer().getLoyaltyPoints() + volumeCredits);</span>
+
+    // Ajouter le montant total dû
+<span class="fc" id="L62">    result.append(String.format(&quot;Amount owed is %s\n&quot;, frmt.format(totalAmount)));</span>
+
+     // Ajouter le total des crédits gagnés
+<span class="fc" id="L65">    result.append(String.format(&quot;You earned %s credits\n&quot;, volumeCredits));</span>
+
+    
+<span class="fc" id="L68">    int customerLoyaltyPoints = invoice.getCustomer().getLoyaltyPoints();</span>
+<span class="fc bfc" id="L69" title="All 2 branches covered.">    if (customerLoyaltyPoints &gt;= 150) {</span>
+<span class="fc" id="L70">      double totalAmountReduced = totalAmount - 15.0;</span>
+
+<span class="fc" id="L72">      result.append(String.format(&quot;You have %s Loyalty Points, you get a $15 reduction\n&quot;, customerLoyaltyPoints));</span>
+
+<span class="fc" id="L74">      customerLoyaltyPoints -= 150;</span>
+<span class="fc" id="L75">      invoice.getCustomer().setLoyaltyPoints(customerLoyaltyPoints);</span>
+
+<span class="fc" id="L77">      result.append(String.format(&quot;Amount owed after reduction %s\n&quot;, frmt.format(totalAmountReduced)));</span>
+<span class="fc" id="L78">      result.append(String.format(&quot;New Fidelity Points %s\n&quot;, customerLoyaltyPoints));</span>
+
+    }
+
+<span class="fc" id="L82">    return result.toString();</span>
+
+}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>
