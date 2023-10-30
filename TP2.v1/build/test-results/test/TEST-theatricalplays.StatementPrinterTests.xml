@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="theatricalplays.StatementPrinterTests" tests="5" skipped="0" failures="0" errors="0" timestamp="2023-10-30T17:37:21" hostname="DESKTOP-MMB3FMF" time="0.233">
+  <properties/>
+  <testcase name="exampleStatement()" classname="theatricalplays.StatementPrinterTests" time="0.173"/>
+  <testcase name="statementWithNewPlayTypes()" classname="theatricalplays.StatementPrinterTests" time="0.009"/>
+  <testcase name="generateHTMLInvoiceTest()" classname="theatricalplays.StatementPrinterTests" time="0.041"/>
+  <testcase name="tragedyWithSmallAudience()" classname="theatricalplays.StatementPrinterTests" time="0.004"/>
+  <testcase name="comedyWithSmallAudience()" classname="theatricalplays.StatementPrinterTests" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
